@@ -14,12 +14,12 @@ st.sidebar.header("Primary Variables")
 
 initial_capital = st.sidebar.number_input("Initial Capital Available ($)", min_value=0, value=1000000, step=50000, help="Total starting cash available to either buy the home or invest.")
 
-purchase_price = st.sidebar.number_input("Purchase Price ($)", min_value=0, value=600000, step=10000, help="The total asking price of the property.")
+purchase_price = st.sidebar.number_input("Purchase Price ($)", min_value=0, value=0, step=10000, help="The total asking price of the property.")
 mortgage_balance = st.sidebar.number_input("Mortgage Balance ($)", min_value=0, value=0, step=10000, help="The initial principal amount of the mortgage. Set to 0 for cash purchase.")
 monthly_mortgage_payment = st.sidebar.number_input("Monthly Mortgage Payment ($)", min_value=0, value=0, step=100, help="Your total monthly principal and interest payment. Set to 0 if no mortgage.")
 mortgage_rate = st.sidebar.number_input("Mortgage Rate (%)", min_value=0.0, value=4.0, step=0.1, help="The annual interest rate on the mortgage.") / 100
 
-monthly_rent = st.sidebar.number_input("Monthly Rent ($)", min_value=0, value=2500, step=100, help="The initial monthly cost to rent a comparable property.")
+monthly_rent = st.sidebar.number_input("Monthly Rent ($)", min_value=0, value=0, step=100, help="The initial monthly cost to rent a comparable property.")
 time_horizon = st.sidebar.number_input("Time Horizon (Years)", value=20, min_value=1, max_value=50, step=1, help="How many years you plan to live in the home before selling.")
 
 # Advanced Assumptions in Expanders
