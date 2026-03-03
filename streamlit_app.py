@@ -24,12 +24,12 @@ rk = st.session_state.reset_key
 
 initial_capital = st.sidebar.number_input("Initial Capital Available ($)", min_value=0, value=1000000, step=50000, key=f"cap_{rk}", help="Total starting cash available to either buy the home or invest.")
 
-purchase_price = st.sidebar.number_input("Purchase Price ($)", min_value=0, value=600000, step=10000, key=f"price_{rk}", help="The total asking price of the property.")
+purchase_price = st.sidebar.number_input("Purchase Price ($)", min_value=0, value=500000, step=10000, key=f"price_{rk}", help="The total asking price of the property.")
 mortgage_balance = st.sidebar.number_input("Mortgage Balance ($)", min_value=0, value=0, step=10000, key=f"mort_{rk}", help="The initial principal amount of the mortgage. Set to 0 for cash purchase.")
 monthly_mortgage_payment = st.sidebar.number_input("Monthly Mortgage Payment ($)", min_value=0, value=0, step=100, key=f"pmt_{rk}", help="Your total monthly principal and interest payment. Set to 0 if no mortgage.")
 mortgage_rate = st.sidebar.number_input("Mortgage Rate (%)", min_value=0.0, value=4.0, step=0.1, key=f"rate_{rk}", help="The annual interest rate on the mortgage.") / 100
 
-monthly_rent = st.sidebar.number_input("Monthly Rent ($)", min_value=0, value=2500, step=100, key=f"rent_{rk}", help="The initial monthly cost to rent a comparable property.")
+monthly_rent = st.sidebar.number_input("Monthly Rent ($)", min_value=0, value=2000, step=100, key=f"rent_{rk}", help="The initial monthly cost to rent a comparable property.")
 time_horizon = st.sidebar.number_input("Time Horizon (Years)", value=20, min_value=1, max_value=50, step=1, key=f"time_{rk}", help="How many years you plan to live in the home before selling.")
 
 # Advanced Assumptions in Expanders
@@ -42,7 +42,7 @@ with st.sidebar.expander("Growth & Inflation Assumptions"):
 
 with st.sidebar.expander("Buying Expenses"):
     acquisition_cost = st.number_input("Acquisition Costs ($)", value=0, step=1000, key=f"acq_{rk}", help="Upfront costs to buy, land transfer tax, legal fees, inspections.")
-    disposition_cost_pct = st.number_input("Disposition Costs (%)", value=0.0, step=0.5, key=f"disp_{rk}", help="Costs to sell at the end of the time horizon, realtor commissions, legal fees.") / 100
+    disposition_cost_pct = st.number_input("Disposition Costs (%)", value=5.0, step=0.5, key=f"disp_{rk}", help="Costs to sell at the end of the time horizon, realtor commissions, legal fees.") / 100
     buy_property_taxes = st.number_input("Property Taxes ($/yr)", value=0, step=500, key=f"b_tax_{rk}")
     buy_maintenance = st.number_input("Maintenance ($/yr)", value=0, step=500, key=f"b_maint_{rk}")
     buy_utilities = st.number_input("Buying Utilities ($/yr)", value=0, step=100, key=f"b_util_{rk}")
