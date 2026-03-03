@@ -14,12 +14,12 @@ st.sidebar.header("Primary Variables")
 
 initial_capital = st.sidebar.number_input("Initial Capital Available ($)", min_value=0, value=1000000, step=50000, help="Total starting cash available to either buy the home or invest.")
 
-purchase_price = st.sidebar.number_input("Purchase Price ($)", min_value=0, value=0, step=10000, help="The total asking price of the property.")
+purchase_price = st.sidebar.number_input("Purchase Price ($)", min_value=0, value=600000, step=10000, help="The total asking price of the property.")
 mortgage_balance = st.sidebar.number_input("Mortgage Balance ($)", min_value=0, value=0, step=10000, help="The initial principal amount of the mortgage. Set to 0 for cash purchase.")
 monthly_mortgage_payment = st.sidebar.number_input("Monthly Mortgage Payment ($)", min_value=0, value=0, step=100, help="Your total monthly principal and interest payment. Set to 0 if no mortgage.")
 mortgage_rate = st.sidebar.number_input("Mortgage Rate (%)", min_value=0.0, value=4.0, step=0.1, help="The annual interest rate on the mortgage.") / 100
 
-monthly_rent = st.sidebar.number_input("Monthly Rent ($)", min_value=0, value=0, step=100, help="The initial monthly cost to rent a comparable property.")
+monthly_rent = st.sidebar.number_input("Monthly Rent ($)", min_value=0, value=2500, step=100, help="The initial monthly cost to rent a comparable property.")
 time_horizon = st.sidebar.number_input("Time Horizon (Years)", value=20, min_value=1, max_value=50, step=1, help="How many years you plan to live in the home before selling.")
 
 # Advanced Assumptions in Expanders
@@ -50,7 +50,7 @@ initial_outlay_buy = down_payment + acquisition_cost
 
 # Safety Check: Does the user have enough capital to buy?
 if initial_capital < initial_outlay_buy:
-    st.error(f"**Error:** The Initial Capital (${initial_capital:,.0f}) is not enough to cover the down payment and acquisition costs (${initial_outlay_buy:,.0f}). Please adjust your inputs.")
+    st.error(f"**Error:** The Initial Capital (\${initial_capital:,.0f}) is not enough to cover the down payment and acquisition costs (\${initial_outlay_buy:,.0f}). Please adjust your inputs.")
     st.stop()
 
 # Initialize Portfolios
@@ -176,27 +176,27 @@ col1, col2 = st.columns(2)
 with col1:
     st.info("**BUY OPTION**")
     st.metric(label="Starting Investment Portfolio", value=f"${(initial_capital - initial_outlay_buy):,.0f}")
-    st.markdown(f"**Total Annual Buy Cost: ${year_1_buy_cost:,.0f}**")
-    st.write(f"Mortgage: ${annual_mortgage_pmt:,.0f}")
-    st.write(f"Property Taxes: ${buy_property_taxes:,.0f}")
-    st.write(f"Maintenance: ${buy_maintenance:,.0f}")
-    st.write(f"Utilities: ${buy_utilities:,.0f}")
-    st.write(f"Insurance: ${buy_insurance:,.0f}")
+    st.markdown(f"**Total Annual Buy Cost: \${year_1_buy_cost:,.0f}**")
+    st.write(f"Mortgage: \${annual_mortgage_pmt:,.0f}")
+    st.write(f"Property Taxes: \${buy_property_taxes:,.0f}")
+    st.write(f"Maintenance: \${buy_maintenance:,.0f}")
+    st.write(f"Utilities: \${buy_utilities:,.0f}")
+    st.write(f"Insurance: \${buy_insurance:,.0f}")
 
 with col2:
     st.warning("**RENT OPTION**")
     st.metric(label="Starting Investment Portfolio", value=f"${initial_capital:,.0f}")
-    st.markdown(f"**Total Annual Rent Cost: ${year_1_rent_cost:,.0f}**")
-    st.write(f"Rent: ${monthly_rent * 12:,.0f}")
-    st.write(f"Utilities: ${rent_utilities:,.0f}")
-    st.write(f"Insurance: ${rent_insurance:,.0f}")
+    st.markdown(f"**Total Annual Rent Cost: \${year_1_rent_cost:,.0f}**")
+    st.write(f"Rent: \${monthly_rent * 12:,.0f}")
+    st.write(f"Utilities: \${rent_utilities:,.0f}")
+    st.write(f"Insurance: \${rent_insurance:,.0f}")
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 if year_1_buy_cost > year_1_rent_cost:
-    st.success(f"**Insight:** The Renter has lower monthly costs and invests the cash flow savings of **${(year_1_buy_cost - year_1_rent_cost):,.2f}** into their portfolio in Year 1.")
+    st.success(f"**Insight:** The Renter has lower monthly costs and invests the cash flow savings of **\${(year_1_buy_cost - year_1_rent_cost):,.2f}** into their portfolio in Year 1.")
 elif year_1_rent_cost > year_1_buy_cost:
-    st.success(f"**Insight:** The Buyer has lower monthly costs and invests the cash flow savings of **${(year_1_rent_cost - year_1_buy_cost):,.2f}** into their portfolio in Year 1.")
+    st.success(f"**Insight:** The Buyer has lower monthly costs and invests the cash flow savings of **\${(year_1_rent_cost - year_1_buy_cost):,.2f}** into their portfolio in Year 1.")
 else:
     st.success("**Insight:** Both options have identical monthly costs in Year 1. No differential cash flow is invested.")
 
@@ -210,14 +210,14 @@ col3, col4 = st.columns(2)
 with col3:
     st.info("**BUY OPTION: WALK-AWAY NET WORTH**")
     st.metric(label="Total Buy Net Worth", value=f"${buy_net_worth[-1]:,.0f}")
-    st.write(f"Final Property Value: ${property_values[-1]:,.0f}")
-    st.write(f"Remaining Mortgage: ${mortgage_balances[-1]:,.0f}")
-    st.write(f"Buyer Investment Portfolio: ${buyer_portfolios[-1]:,.0f}")
+    st.write(f"Final Property Value: \${property_values[-1]:,.0f}")
+    st.write(f"Remaining Mortgage: \${mortgage_balances[-1]:,.0f}")
+    st.write(f"Buyer Investment Portfolio: \${buyer_portfolios[-1]:,.0f}")
 
 with col4:
     st.warning("**RENT OPTION: FINAL PORTFOLIO**")
     st.metric(label="Total Rent Net Worth", value=f"${rent_net_worth[-1]:,.0f}")
-    st.write(f"Renter Investment Portfolio: ${renter_portfolios[-1]:,.0f}")
+    st.write(f"Renter Investment Portfolio: \${renter_portfolios[-1]:,.0f}")
 
 st.markdown("---")
 
@@ -260,9 +260,9 @@ with st.expander("How this calculator works & Default Assumptions"):
     * **Rent Scenario:** Represents the total value of the renter's investment portfolio.
     
     **Default Assumptions**
-    * **Initial Capital ($1,000,000):** Represents the total cash available before making a housing decision.
+    * **Initial Capital (\$1,000,000):** Represents the total cash available before making a housing decision.
     * **Inflation & Appreciation (2.10%):** A baseline assumption for the annual growth of property values, rent prices, and general living expenses.
     * **Investment Return (5.00%):** The assumed gross annual return on any capital kept in the investment portfolios.
     * **Time Horizon (20 Years):** The duration of the simulation before liquidating the property.
-    * **Expenses ($0):** All ongoing maintenance, tax, and utility expenses default to zero to allow for custom inputs based on specific properties.
+    * **Expenses (\$0):** All ongoing maintenance, tax, and utility expenses default to zero to allow for custom inputs based on specific properties.
     """)
