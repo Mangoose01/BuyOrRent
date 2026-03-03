@@ -87,6 +87,8 @@ annual_mortgage_pmt = monthly_mortgage_payment * 12
 year_1_buy_cost = annual_mortgage_pmt + buy_property_taxes + buy_maintenance + buy_utilities + buy_insurance + buy_other_expenses
 year_1_rent_cost = current_annual_rent + rent_utilities + rent_insurance + rent_other_expenses
 
+break_even_year = None
+
 for year in range(1, time_horizon + 1):
     years_list.append(year)
     
@@ -123,8 +125,16 @@ for year in range(1, time_horizon + 1):
     current_buy_equity = current_property_value - current_mortgage - disposition_fee
     
     # Record values
-    buy_net_worth.append(current_buy_equity + buyer_portfolio)
-    rent_net_worth.append(renter_portfolio)
+    total_buy_nw = current_buy_equity + buyer_portfolio
+    total_rent_nw = renter_portfolio
+    
+    buy_net_worth.append(total_buy_nw)
+    rent_net_worth.append(total_rent_nw)
+    
+    # Check for Break-Even Year (When Buy overtakes Rent)
+    if break_even_year is None and total_buy_nw > total_rent_nw:
+        break_even_year = year
+
     property_values.append(current_property_value)
     mortgage_balances.append(current_mortgage)
     buyer_portfolios.append(buyer_portfolio)
@@ -212,6 +222,13 @@ elif final_rent_nw > final_buy_nw:
     st.success(f"**Long-Term Insight:** Over {time_horizon} years, the **Rent** option yields a higher total net worth by **\${(final_rent_nw - final_buy_nw):,.0f}**.")
 else:
     st.success(f"**Long-Term Insight:** Over {time_horizon} years, both options result in the exact same net worth.")
+
+# === BREAK-EVEN ANALYSIS ===
+st.markdown("### Break-Even Analysis")
+if break_even_year:
+    st.info(f"**Crossover Point:** The Buying scenario becomes more advantageous than Renting starting in **Year {break_even_year}**.")
+else:
+    st.info("**Crossover Point:** Within this {time_horizon}-year horizon, the Renting scenario remains more advantageous than Buying.")
 
 st.markdown("---")
 
