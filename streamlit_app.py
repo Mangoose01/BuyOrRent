@@ -181,7 +181,17 @@ with col2:
     st.metric(label="Starting Investment Portfolio", value=f"${initial_capital:,.0f}")
     st.markdown(f"**Total Annual Rent Cost: \${year_1_rent_cost:,.0f}**")
 
+st.markdown("<br>", unsafe_allow_html=True)
+
+if year_1_buy_cost > year_1_rent_cost:
+    st.success(f"**Insight:** The Renter has lower monthly costs and invests the cash flow savings of **\${(year_1_buy_cost - year_1_rent_cost):,.2f}** into their portfolio in Year 1.")
+elif year_1_rent_cost > year_1_buy_cost:
+    st.success(f"**Insight:** The Buyer has lower monthly costs and invests the cash flow savings of **\${(year_1_rent_cost - year_1_buy_cost):,.2f}** into their portfolio in Year 1.")
+else:
+    st.success("**Insight:** Both options have identical monthly costs in Year 1. No differential cash flow is invested.")
+
 st.markdown("---")
+
 st.markdown(f"### Final Year Snapshot (Year {time_horizon})")
 col3, col4 = st.columns(2)
 with col3:
@@ -190,6 +200,18 @@ with col3:
 with col4:
     st.warning("**RENT OPTION: FINAL PORTFOLIO**")
     st.metric(label="Total Rent Net Worth", value=f"${rent_net_worth[-1]:,.0f}")
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+final_buy_nw = buy_net_worth[-1]
+final_rent_nw = rent_net_worth[-1]
+
+if final_buy_nw > final_rent_nw:
+    st.success(f"**Long-Term Insight:** Over {time_horizon} years, the **Buy** option yields a higher total net worth by **\${(final_buy_nw - final_rent_nw):,.0f}**.")
+elif final_rent_nw > final_buy_nw:
+    st.success(f"**Long-Term Insight:** Over {time_horizon} years, the **Rent** option yields a higher total net worth by **\${(final_rent_nw - final_buy_nw):,.0f}**.")
+else:
+    st.success(f"**Long-Term Insight:** Over {time_horizon} years, both options result in the exact same net worth.")
 
 st.markdown("---")
 
@@ -208,16 +230,11 @@ with st.expander("View Year-by-Year Data breakdown"):
         "Rent Scenario Net Worth ($)": rent_net_worth
     })
     
-    # Custom Styling Function to highlight final year liquidation
-    def highlight_final_year_sale(s):
-        return ['background-color: #ffcccc; font-weight: bold' if s.name == len(df)-1 else '' for _ in s]
-
     # Apply Styles
     styled_df = df.style.format("{:,.0f}", subset=df.columns[1:]) \
         .set_properties(**{'text-align': 'center'}) \
         .set_properties(subset=['Buy Scenario Net Worth ($)'], **{'background-color': '#4169E1', 'color': 'white'}) \
-        .set_properties(subset=['Rent Scenario Net Worth ($)'], **{'background-color': '#FFD700', 'color': 'black'}) \
-        .apply(highlight_final_year_sale, axis=1, subset=['Hypothetical Disposition Cost ($)'])
+        .set_properties(subset=['Rent Scenario Net Worth ($)'], **{'background-color': '#FFD700', 'color': 'black'})
 
     st.dataframe(styled_df, use_container_width=True)
 
@@ -236,5 +253,5 @@ with st.expander("How this calculator works & Default Assumptions"):
     * **Rent Scenario:** Represents the total value of the renter's investment portfolio.
     
     **Disposition Costs**
-    The "Hypothetical Disposition Cost" column represents the realtor fees and legal costs required to sell the home in that specific year. In the final year (Year {time_horizon}), this represents the actual liquidation hit required to realize the net worth.
+    The "Hypothetical Disposition Cost" column represents the realtor fees and legal costs required to sell the home in that specific year. In the final year, this represents the actual liquidation hit required to realize the net worth.
     """)
