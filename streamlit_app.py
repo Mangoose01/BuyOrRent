@@ -12,6 +12,8 @@ st.markdown("A comprehensive cash flow and net worth analysis.")
 # === SIDEBAR INPUTS ===
 st.sidebar.header("Primary Variables")
 
+initial_capital = st.sidebar.number_input("Initial Capital Available ($)", min_value=0, value=1000000, step=50000, help="Total starting cash available to either buy the home or invest.")
+
 purchase_price = st.sidebar.number_input("Purchase Price ($)", min_value=0, value=600000, step=10000, help="The total asking price of the property.")
 mortgage_balance = st.sidebar.number_input("Mortgage Balance ($)", min_value=0, value=0, step=10000, help="The initial principal amount of the mortgage. Set to 0 for cash purchase.")
 monthly_mortgage_payment = st.sidebar.number_input("Monthly Mortgage Payment ($)", min_value=0, value=0, step=100, help="Your total monthly principal and interest payment. Set to 0 if no mortgage.")
@@ -25,7 +27,7 @@ with st.sidebar.expander("Growth & Inflation Assumptions"):
     property_appreciation = st.number_input("Property Appreciation (%)", value=3.0, step=0.1, help="Expected annual increase in property value.") / 100
     rent_inflation = st.number_input("Rent Inflation (%)", value=2.5, step=0.1, help="Expected annual increase in rent.") / 100
     general_inflation = st.number_input("General Inflation (%)", value=2.0, step=0.1, help="Expected annual increase for ongoing expenses.") / 100
-    investment_return = st.number_input("Investment Return (%)", value=6.0, step=0.1, help="Expected gross annual return on the renter's invested portfolio.") / 100
+    investment_return = st.number_input("Investment Return (%)", value=6.0, step=0.1, help="Expected gross annual return on the invested portfolio.") / 100
     investment_tax_rate = st.number_input("Investment Tax Rate (%)", value=25.0, step=1.0, help="The average tax rate applied to investment growth.") / 100
 
 with st.sidebar.expander("Buying Expenses"):
@@ -45,7 +47,15 @@ with st.sidebar.expander("Renting Expenses"):
 # === CALCULATION LOGIC ===
 down_payment = purchase_price - mortgage_balance
 initial_outlay_buy = down_payment + acquisition_cost
-renter_portfolio = initial_outlay_buy
+
+# Safety Check: Does the user have enough capital to buy?
+if initial_capital < initial_outlay_buy:
+    st.error(f"**Error:** The Initial Capital (${initial_capital:,.0f}) is not enough to cover the down payment and acquisition costs (${initial_outlay_buy:,.0f}). Please adjust your inputs.")
+    st.stop()
+
+# Initialize Portfolios
+buyer_portfolio = initial_capital - initial_outlay_buy
+renter_portfolio = initial_capital
 
 years_list = []
 buy_net_worth = []
@@ -62,7 +72,7 @@ year_1_rent_cost = current_annual_rent + rent_utilities + rent_insurance + rent_
 for year in range(1, time_horizon + 1):
     years_list.append(year)
     
-    # BUY SCENARIO
+    # BUY SCENARIO: Mortgage Paydown & Equity
     if current_mortgage > 0:
         interest_paid = current_mortgage * mortgage_rate
         principal_paid = annual_mortgage_pmt - interest_paid
@@ -77,19 +87,26 @@ for year in range(1, time_horizon + 1):
         
     current_property_value *= (1 + property_appreciation)
     
-    disposition_fee = current_property_value * disposition_cost_pct
-    current_buy_equity = current_property_value - current_mortgage - disposition_fee
-    buy_net_worth.append(current_buy_equity)
-    
-    # RENT SCENARIO
+    # Calculate Total Costs for the Year
     current_buy_cost = annual_mortgage_pmt + buy_property_taxes + buy_maintenance + buy_utilities + buy_insurance + buy_other_expenses
     current_rent_cost = current_annual_rent + rent_utilities + rent_insurance + rent_other_expenses
     
-    cash_flow_difference = current_buy_cost - current_rent_cost
-    
+    # Grow Portfolios
     after_tax_return = investment_return * (1 - investment_tax_rate)
+    buyer_portfolio *= (1 + after_tax_return)
     renter_portfolio *= (1 + after_tax_return)
-    renter_portfolio += cash_flow_difference 
+    
+    # Invest the Cash Flow Difference
+    if current_buy_cost > current_rent_cost:
+        renter_portfolio += (current_buy_cost - current_rent_cost)
+    elif current_rent_cost > current_buy_cost:
+        buyer_portfolio += (current_rent_cost - current_buy_cost)
+    
+    # Calculate Final Liquid Net Worth for the Year
+    disposition_fee = current_property_value * disposition_cost_pct
+    current_buy_equity = current_property_value - current_mortgage - disposition_fee
+    
+    buy_net_worth.append(current_buy_equity + buyer_portfolio)
     rent_net_worth.append(renter_portfolio)
     
     # Inflate expenses for next year
@@ -111,10 +128,10 @@ fig.add_trace(go.Scatter(
     x=years_list, 
     y=buy_net_worth, 
     mode='lines+markers',
-    name='Buy (Net Equity)',
+    name='Buy (Equity + Portfolio)',
     line=dict(color='#4169E1', width=3),
     marker=dict(size=6),
-    hovertemplate="Year %{x}<br>Net Equity: $%{y:,.0f}<extra></extra>"
+    hovertemplate="Year %{x}<br>Total Net Worth: $%{y:,.0f}<extra></extra>"
 ))
 
 # Add Rent Scenario Line
@@ -125,12 +142,12 @@ fig.add_trace(go.Scatter(
     name='Rent (Portfolio Value)',
     line=dict(color='#FFD700', width=3),
     marker=dict(size=6),
-    hovertemplate="Year %{x}<br>Portfolio: $%{y:,.0f}<extra></extra>"
+    hovertemplate="Year %{x}<br>Total Net Worth: $%{y:,.0f}<extra></extra>"
 ))
 
 # Styling the chart to look modern and clean
 fig.update_layout(
-    title=dict(text=f"Net Worth Projection Over {time_horizon} Years", font=dict(size=20)),
+    title=dict(text=f"Total Net Worth Projection Over {time_horizon} Years", font=dict(size=20)),
     xaxis_title="Years",
     yaxis_title="Net Liquid Value ($)",
     hovermode="x unified",
@@ -142,33 +159,31 @@ fig.update_layout(
 st.plotly_chart(fig, use_container_width=True)
 
 # === CASH FLOW SUMMARY (Modern Layout) ===
-st.markdown("### Year 1 Cash Flow Summary")
+st.markdown("### Year 1 Snapshot")
 
 col1, col2 = st.columns(2)
 
 with col1:
     st.info("**BUY OPTION**")
-    st.metric(label="Total Annual Buy Cost", value=f"${year_1_buy_cost:,.0f}")
+    st.metric(label="Starting Investment Portfolio", value=f"${(initial_capital - initial_outlay_buy):,.0f}")
+    st.markdown(f"**Total Annual Buy Cost: ${year_1_buy_cost:,.0f}**")
     st.write(f"Mortgage: ${annual_mortgage_pmt:,.0f}")
     st.write(f"Property Taxes: ${buy_property_taxes:,.0f}")
     st.write(f"Maintenance: ${buy_maintenance:,.0f}")
     st.write(f"Utilities: ${buy_utilities:,.0f}")
     st.write(f"Insurance: ${buy_insurance:,.0f}")
-    if buy_other_expenses > 0:
-        st.write(f"Other: ${buy_other_expenses:,.0f}")
 
 with col2:
     st.warning("**RENT OPTION**")
-    st.metric(label="Total Annual Rent Cost", value=f"${year_1_rent_cost:,.0f}")
+    st.metric(label="Starting Investment Portfolio", value=f"${initial_capital:,.0f}")
+    st.markdown(f"**Total Annual Rent Cost: ${year_1_rent_cost:,.0f}**")
     st.write(f"Rent: ${monthly_rent * 12:,.0f}")
     st.write(f"Utilities: ${rent_utilities:,.0f}")
     st.write(f"Insurance: ${rent_insurance:,.0f}")
-    if rent_other_expenses > 0:
-        st.write(f"Other: ${rent_other_expenses:,.0f}")
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 if year_1_buy_cost > year_1_rent_cost:
     st.success(f"**Insight:** The Renter has lower monthly costs and invests the cash flow savings of **${(year_1_buy_cost - year_1_rent_cost):,.2f}** into their portfolio in Year 1.")
 else:
-    st.success(f"**Insight:** The Buyer has lower monthly costs, resulting in a cash flow advantage of **${(year_1_rent_cost - year_1_buy_cost):,.2f}** in Year 1.")
+    st.success(f"**Insight:** The Buyer has lower monthly costs and invests the cash flow savings of **${(year_1_rent_cost - year_1_buy_cost):,.2f}** into their portfolio in Year 1.")
