@@ -12,42 +12,47 @@ st.markdown("A comprehensive cash flow and net worth analysis.")
 # === SIDEBAR INPUTS ===
 st.sidebar.header("Primary Variables")
 
-# Reset Button
+# Dynamic Key Tracker for Reset Button
+if "reset_key" not in st.session_state:
+    st.session_state.reset_key = 0
+
 if st.sidebar.button("Reset All Variables", type="primary", use_container_width=True):
-    st.session_state.clear()
+    st.session_state.reset_key += 1
     st.rerun()
 
-initial_capital = st.sidebar.number_input("Initial Capital Available ($)", min_value=0, value=1000000, step=50000, help="Total starting cash available to either buy the home or invest.")
+rk = st.session_state.reset_key
 
-purchase_price = st.sidebar.number_input("Purchase Price ($)", min_value=0, value=600000, step=10000, help="The total asking price of the property.")
-mortgage_balance = st.sidebar.number_input("Mortgage Balance ($)", min_value=0, value=0, step=10000, help="The initial principal amount of the mortgage. Set to 0 for cash purchase.")
-monthly_mortgage_payment = st.sidebar.number_input("Monthly Mortgage Payment ($)", min_value=0, value=0, step=100, help="Your total monthly principal and interest payment. Set to 0 if no mortgage.")
-mortgage_rate = st.sidebar.number_input("Mortgage Rate (%)", min_value=0.0, value=4.0, step=0.1, help="The annual interest rate on the mortgage.") / 100
+initial_capital = st.sidebar.number_input("Initial Capital Available ($)", min_value=0, value=1000000, step=50000, key=f"cap_{rk}", help="Total starting cash available to either buy the home or invest.")
 
-monthly_rent = st.sidebar.number_input("Monthly Rent ($)", min_value=0, value=2500, step=100, help="The initial monthly cost to rent a comparable property.")
-time_horizon = st.sidebar.number_input("Time Horizon (Years)", value=20, min_value=1, max_value=50, step=1, help="How many years you plan to live in the home before selling.")
+purchase_price = st.sidebar.number_input("Purchase Price ($)", min_value=0, value=600000, step=10000, key=f"price_{rk}", help="The total asking price of the property.")
+mortgage_balance = st.sidebar.number_input("Mortgage Balance ($)", min_value=0, value=0, step=10000, key=f"mort_{rk}", help="The initial principal amount of the mortgage. Set to 0 for cash purchase.")
+monthly_mortgage_payment = st.sidebar.number_input("Monthly Mortgage Payment ($)", min_value=0, value=0, step=100, key=f"pmt_{rk}", help="Your total monthly principal and interest payment. Set to 0 if no mortgage.")
+mortgage_rate = st.sidebar.number_input("Mortgage Rate (%)", min_value=0.0, value=4.0, step=0.1, key=f"rate_{rk}", help="The annual interest rate on the mortgage.") / 100
+
+monthly_rent = st.sidebar.number_input("Monthly Rent ($)", min_value=0, value=2500, step=100, key=f"rent_{rk}", help="The initial monthly cost to rent a comparable property.")
+time_horizon = st.sidebar.number_input("Time Horizon (Years)", value=20, min_value=1, max_value=50, step=1, key=f"time_{rk}", help="How many years you plan to live in the home before selling.")
 
 # Advanced Assumptions in Expanders
 with st.sidebar.expander("Growth & Inflation Assumptions"):
-    property_appreciation = st.number_input("Property Appreciation (%)", value=2.10, step=0.10, format="%.2f") / 100
-    rent_inflation = st.number_input("Rent Inflation (%)", value=2.10, step=0.10, format="%.2f") / 100
-    general_inflation = st.number_input("General Inflation (%)", value=2.10, step=0.10, format="%.2f") / 100
-    investment_return = st.number_input("Investment Return (%)", value=5.0, step=0.1, help="Expected gross annual return on the invested portfolio.") / 100
-    investment_tax_rate = st.number_input("Investment Tax Rate (%)", value=0.0, step=1.0, help="The average tax rate applied to investment growth.") / 100
+    property_appreciation = st.number_input("Property Appreciation (%)", value=2.10, step=0.10, format="%.2f", key=f"app_{rk}") / 100
+    rent_inflation = st.number_input("Rent Inflation (%)", value=2.10, step=0.10, format="%.2f", key=f"r_inf_{rk}") / 100
+    general_inflation = st.number_input("General Inflation (%)", value=2.10, step=0.10, format="%.2f", key=f"g_inf_{rk}") / 100
+    investment_return = st.number_input("Investment Return (%)", value=5.0, step=0.1, key=f"inv_ret_{rk}", help="Expected gross annual return on the invested portfolio.") / 100
+    investment_tax_rate = st.number_input("Investment Tax Rate (%)", value=0.0, step=1.0, key=f"tax_{rk}", help="The average tax rate applied to investment growth.") / 100
 
 with st.sidebar.expander("Buying Expenses"):
-    acquisition_cost = st.number_input("Acquisition Costs ($)", value=0, step=1000, help="Upfront costs to buy, land transfer tax, legal fees, inspections.")
-    disposition_cost_pct = st.number_input("Disposition Costs (%)", value=0.0, step=0.5, help="Costs to sell at the end of the time horizon, realtor commissions, legal fees.") / 100
-    buy_property_taxes = st.number_input("Property Taxes ($/yr)", value=0, step=500)
-    buy_maintenance = st.number_input("Maintenance ($/yr)", value=0, step=500)
-    buy_utilities = st.number_input("Buying Utilities ($/yr)", value=0, step=100)
-    buy_insurance = st.number_input("Home Insurance ($/yr)", value=0, step=100)
-    buy_other_expenses = st.number_input("Other Buying Expenses ($/yr)", value=0, step=100)
+    acquisition_cost = st.number_input("Acquisition Costs ($)", value=0, step=1000, key=f"acq_{rk}", help="Upfront costs to buy, land transfer tax, legal fees, inspections.")
+    disposition_cost_pct = st.number_input("Disposition Costs (%)", value=0.0, step=0.5, key=f"disp_{rk}", help="Costs to sell at the end of the time horizon, realtor commissions, legal fees.") / 100
+    buy_property_taxes = st.number_input("Property Taxes ($/yr)", value=0, step=500, key=f"b_tax_{rk}")
+    buy_maintenance = st.number_input("Maintenance ($/yr)", value=0, step=500, key=f"b_maint_{rk}")
+    buy_utilities = st.number_input("Buying Utilities ($/yr)", value=0, step=100, key=f"b_util_{rk}")
+    buy_insurance = st.number_input("Home Insurance ($/yr)", value=0, step=100, key=f"b_ins_{rk}")
+    buy_other_expenses = st.number_input("Other Buying Expenses ($/yr)", value=0, step=100, key=f"b_oth_{rk}")
 
 with st.sidebar.expander("Renting Expenses"):
-    rent_utilities = st.number_input("Renting Utilities ($/yr)", value=0, step=100)
-    rent_insurance = st.number_input("Tenant Insurance ($/yr)", value=0, step=50)
-    rent_other_expenses = st.number_input("Other Renting Expenses ($/yr)", value=0, step=100)
+    rent_utilities = st.number_input("Renting Utilities ($/yr)", value=0, step=100, key=f"r_util_{rk}")
+    rent_insurance = st.number_input("Tenant Insurance ($/yr)", value=0, step=50, key=f"r_ins_{rk}")
+    rent_other_expenses = st.number_input("Other Renting Expenses ($/yr)", value=0, step=100, key=f"r_oth_{rk}")
 
 # === CALCULATION LOGIC ===
 down_payment = purchase_price - mortgage_balance
