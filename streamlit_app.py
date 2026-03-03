@@ -12,6 +12,11 @@ st.markdown("A comprehensive cash flow and net worth analysis.")
 # === SIDEBAR INPUTS ===
 st.sidebar.header("Primary Variables")
 
+# Reset Button
+if st.sidebar.button("Reset All Variables", type="primary", use_container_width=True):
+    st.session_state.clear()
+    st.rerun()
+
 initial_capital = st.sidebar.number_input("Initial Capital Available ($)", min_value=0, value=1000000, step=50000, help="Total starting cash available to either buy the home or invest.")
 
 purchase_price = st.sidebar.number_input("Purchase Price ($)", min_value=0, value=600000, step=10000, help="The total asking price of the property.")
