@@ -17,31 +17,31 @@ initial_capital = st.sidebar.number_input("Initial Capital Available ($)", min_v
 purchase_price = st.sidebar.number_input("Purchase Price ($)", min_value=0, value=600000, step=10000, help="The total asking price of the property.")
 mortgage_balance = st.sidebar.number_input("Mortgage Balance ($)", min_value=0, value=0, step=10000, help="The initial principal amount of the mortgage. Set to 0 for cash purchase.")
 monthly_mortgage_payment = st.sidebar.number_input("Monthly Mortgage Payment ($)", min_value=0, value=0, step=100, help="Your total monthly principal and interest payment. Set to 0 if no mortgage.")
-mortgage_rate = st.sidebar.number_input("Mortgage Rate (%)", min_value=0.0, value=5.0, step=0.1, help="The annual interest rate on the mortgage.") / 100
+mortgage_rate = st.sidebar.number_input("Mortgage Rate (%)", min_value=0.0, value=4.0, step=0.1, help="The annual interest rate on the mortgage.") / 100
 
 monthly_rent = st.sidebar.number_input("Monthly Rent ($)", min_value=0, value=2500, step=100, help="The initial monthly cost to rent a comparable property.")
-time_horizon = st.sidebar.number_input("Time Horizon (Years)", value=25, min_value=1, max_value=50, step=1, help="How many years you plan to live in the home before selling.")
+time_horizon = st.sidebar.number_input("Time Horizon (Years)", value=20, min_value=1, max_value=50, step=1, help="How many years you plan to live in the home before selling.")
 
 # Advanced Assumptions in Expanders
 with st.sidebar.expander("Growth & Inflation Assumptions"):
-    property_appreciation = st.number_input("Property Appreciation (%)", value=3.0, step=0.1, help="Expected annual increase in property value.") / 100
-    rent_inflation = st.number_input("Rent Inflation (%)", value=2.5, step=0.1, help="Expected annual increase in rent.") / 100
-    general_inflation = st.number_input("General Inflation (%)", value=2.0, step=0.1, help="Expected annual increase for ongoing expenses.") / 100
-    investment_return = st.number_input("Investment Return (%)", value=6.0, step=0.1, help="Expected gross annual return on the invested portfolio.") / 100
-    investment_tax_rate = st.number_input("Investment Tax Rate (%)", value=25.0, step=1.0, help="The average tax rate applied to investment growth.") / 100
+    property_appreciation = st.number_input("Property Appreciation (%)", value=2.10, step=0.10, format="%.2f") / 100
+    rent_inflation = st.number_input("Rent Inflation (%)", value=2.10, step=0.10, format="%.2f") / 100
+    general_inflation = st.number_input("General Inflation (%)", value=2.10, step=0.10, format="%.2f") / 100
+    investment_return = st.number_input("Investment Return (%)", value=5.0, step=0.1, help="Expected gross annual return on the invested portfolio.") / 100
+    investment_tax_rate = st.number_input("Investment Tax Rate (%)", value=0.0, step=1.0, help="The average tax rate applied to investment growth.") / 100
 
 with st.sidebar.expander("Buying Expenses"):
-    acquisition_cost = st.number_input("Acquisition Costs ($)", value=10000, step=1000, help="Upfront costs to buy: land transfer tax, legal fees, inspections.")
-    disposition_cost_pct = st.number_input("Disposition Costs (%)", value=5.0, step=0.5, help="Costs to sell at the end of the time horizon: realtor commissions, legal fees.") / 100
-    buy_property_taxes = st.number_input("Property Taxes ($/yr)", value=4000, step=500)
-    buy_maintenance = st.number_input("Maintenance ($/yr)", value=3000, step=500)
-    buy_utilities = st.number_input("Buying Utilities ($/yr)", value=2400, step=100)
-    buy_insurance = st.number_input("Home Insurance ($/yr)", value=1200, step=100)
+    acquisition_cost = st.number_input("Acquisition Costs ($)", value=0, step=1000, help="Upfront costs to buy: land transfer tax, legal fees, inspections.")
+    disposition_cost_pct = st.number_input("Disposition Costs (%)", value=0.0, step=0.5, help="Costs to sell at the end of the time horizon: realtor commissions, legal fees.") / 100
+    buy_property_taxes = st.number_input("Property Taxes ($/yr)", value=0, step=500)
+    buy_maintenance = st.number_input("Maintenance ($/yr)", value=0, step=500)
+    buy_utilities = st.number_input("Buying Utilities ($/yr)", value=0, step=100)
+    buy_insurance = st.number_input("Home Insurance ($/yr)", value=0, step=100)
     buy_other_expenses = st.number_input("Other Buying Expenses ($/yr)", value=0, step=100)
 
 with st.sidebar.expander("Renting Expenses"):
-    rent_utilities = st.number_input("Renting Utilities ($/yr)", value=1800, step=100)
-    rent_insurance = st.number_input("Tenant Insurance ($/yr)", value=300, step=50)
+    rent_utilities = st.number_input("Renting Utilities ($/yr)", value=0, step=100)
+    rent_insurance = st.number_input("Tenant Insurance ($/yr)", value=0, step=50)
     rent_other_expenses = st.number_input("Other Renting Expenses ($/yr)", value=0, step=100)
 
 # === CALCULATION LOGIC ===
@@ -185,5 +185,29 @@ st.markdown("<br>", unsafe_allow_html=True)
 
 if year_1_buy_cost > year_1_rent_cost:
     st.success(f"**Insight:** The Renter has lower monthly costs and invests the cash flow savings of **${(year_1_buy_cost - year_1_rent_cost):,.2f}** into their portfolio in Year 1.")
-else:
+elif year_1_rent_cost > year_1_buy_cost:
     st.success(f"**Insight:** The Buyer has lower monthly costs and invests the cash flow savings of **${(year_1_rent_cost - year_1_buy_cost):,.2f}** into their portfolio in Year 1.")
+else:
+    st.success("**Insight:** Both options have identical monthly costs in Year 1. No differential cash flow is invested.")
+
+st.markdown("---")
+
+# === DISCLAIMER & METHODOLOGY ===
+with st.expander("How this calculator works & Default Assumptions"):
+    st.markdown("""
+    **Methodology: Differential Cash Flow**
+    This calculator provides a true apples-to-apples comparison by assuming both the renter and the buyer commit the exact same amount of cash to their housing each year. 
+    * If buying costs more per month, the renter invests the difference into their portfolio. 
+    * If renting costs more per month, the buyer invests the difference into their portfolio. 
+    
+    **Net Worth Calculation**
+    * **Buy Scenario:** Calculates the liquid walk-away money. This is the estimated property value, minus the remaining mortgage balance, minus the cost to sell the home, plus whatever is left in the buyer's investment portfolio.
+    * **Rent Scenario:** Represents the total value of the renter's investment portfolio.
+    
+    **Default Assumptions**
+    * **Initial Capital ($1,000,000):** Represents the total cash available before making a housing decision.
+    * **Inflation & Appreciation (2.10%):** A baseline assumption for the annual growth of property values, rent prices, and general living expenses.
+    * **Investment Return (5.00%):** The assumed gross annual return on any capital kept in the investment portfolios.
+    * **Time Horizon (20 Years):** The duration of the simulation before liquidating the property.
+    * **Expenses ($0):** All ongoing maintenance, tax, and utility expenses default to zero to allow for custom inputs based on specific properties.
+    """)
