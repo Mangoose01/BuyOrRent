@@ -31,8 +31,8 @@ with st.sidebar.expander("Growth & Inflation Assumptions"):
     investment_tax_rate = st.number_input("Investment Tax Rate (%)", value=0.0, step=1.0, help="The average tax rate applied to investment growth.") / 100
 
 with st.sidebar.expander("Buying Expenses"):
-    acquisition_cost = st.number_input("Acquisition Costs ($)", value=0, step=1000, help="Upfront costs to buy: land transfer tax, legal fees, inspections.")
-    disposition_cost_pct = st.number_input("Disposition Costs (%)", value=0.0, step=0.5, help="Costs to sell at the end of the time horizon: realtor commissions, legal fees.") / 100
+    acquisition_cost = st.number_input("Acquisition Costs ($)", value=0, step=1000, help="Upfront costs to buy, land transfer tax, legal fees, inspections.")
+    disposition_cost_pct = st.number_input("Disposition Costs (%)", value=0.0, step=0.5, help="Costs to sell at the end of the time horizon, realtor commissions, legal fees.") / 100
     buy_property_taxes = st.number_input("Property Taxes ($/yr)", value=0, step=500)
     buy_maintenance = st.number_input("Maintenance ($/yr)", value=0, step=500)
     buy_utilities = st.number_input("Buying Utilities ($/yr)", value=0, step=100)
@@ -57,9 +57,14 @@ if initial_capital < initial_outlay_buy:
 buyer_portfolio = initial_capital - initial_outlay_buy
 renter_portfolio = initial_capital
 
+# Lists for plotting and data table
 years_list = []
 buy_net_worth = []
 rent_net_worth = []
+property_values = []
+mortgage_balances = []
+buyer_portfolios = []
+renter_portfolios = []
 
 current_property_value = purchase_price
 current_mortgage = mortgage_balance
@@ -106,8 +111,13 @@ for year in range(1, time_horizon + 1):
     disposition_fee = current_property_value * disposition_cost_pct
     current_buy_equity = current_property_value - current_mortgage - disposition_fee
     
+    # Record values for table and graph
     buy_net_worth.append(current_buy_equity + buyer_portfolio)
     rent_net_worth.append(renter_portfolio)
+    property_values.append(current_property_value)
+    mortgage_balances.append(current_mortgage)
+    buyer_portfolios.append(buyer_portfolio)
+    renter_portfolios.append(renter_portfolio)
     
     # Inflate expenses for next year
     current_annual_rent *= (1 + rent_inflation)
@@ -189,6 +199,51 @@ elif year_1_rent_cost > year_1_buy_cost:
     st.success(f"**Insight:** The Buyer has lower monthly costs and invests the cash flow savings of **${(year_1_rent_cost - year_1_buy_cost):,.2f}** into their portfolio in Year 1.")
 else:
     st.success("**Insight:** Both options have identical monthly costs in Year 1. No differential cash flow is invested.")
+
+st.markdown("---")
+
+# === FINAL YEAR SNAPSHOT ===
+st.markdown(f"### Final Year Snapshot (Year {time_horizon})")
+
+col3, col4 = st.columns(2)
+
+with col3:
+    st.info("**BUY OPTION: WALK-AWAY NET WORTH**")
+    st.metric(label="Total Buy Net Worth", value=f"${buy_net_worth[-1]:,.0f}")
+    st.write(f"Final Property Value: ${property_values[-1]:,.0f}")
+    st.write(f"Remaining Mortgage: ${mortgage_balances[-1]:,.0f}")
+    st.write(f"Buyer Investment Portfolio: ${buyer_portfolios[-1]:,.0f}")
+
+with col4:
+    st.warning("**RENT OPTION: FINAL PORTFOLIO**")
+    st.metric(label="Total Rent Net Worth", value=f"${rent_net_worth[-1]:,.0f}")
+    st.write(f"Renter Investment Portfolio: ${renter_portfolios[-1]:,.0f}")
+
+st.markdown("---")
+
+# === YEAR-BY-YEAR DATA TABLE ===
+with st.expander("View Year-by-Year Data"):
+    df = pd.DataFrame({
+        "Year": years_list,
+        "Property Value ($)": property_values,
+        "Mortgage Balance ($)": mortgage_balances,
+        "Buyer Portfolio ($)": buyer_portfolios,
+        "Buy Scenario Net Worth ($)": buy_net_worth,
+        "Renter Portfolio ($)": renter_portfolios,
+        "Rent Scenario Net Worth ($)": rent_net_worth
+    })
+    
+    # Format the dataframe to show currency properly
+    styled_df = df.style.format({
+        "Property Value ($)": "{:,.0f}",
+        "Mortgage Balance ($)": "{:,.0f}",
+        "Buyer Portfolio ($)": "{:,.0f}",
+        "Buy Scenario Net Worth ($)": "{:,.0f}",
+        "Renter Portfolio ($)": "{:,.0f}",
+        "Rent Scenario Net Worth ($)": "{:,.0f}"
+    })
+    
+    st.dataframe(styled_df, use_container_width=True)
 
 st.markdown("---")
 
