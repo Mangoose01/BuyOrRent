@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import numpy as np
 
-# Page Configuration
+# Page Configuration for a wide, clean layout
 st.set_page_config(page_title="Rent vs Buy Calculator", layout="wide", initial_sidebar_state="expanded")
 
 # Custom CSS for Apple-style UI and Professional Print Formatting
@@ -11,15 +11,24 @@ st.markdown("""
     <style>
     /* Professional Print Styling */
     @media print {
-        header, .stSidebar, .stActionButton, .stButton, .stExpander, [data-testid="stToolbar"] {
+        /* Hide web-only elements */
+        header, .stSidebar, .stActionButton, .stButton, .stExpander, [data-testid="stToolbar"], [data-testid="stDecoration"] {
             display: none !important;
         }
+        /* Expand the main content area to full page width */
         .main .block-container {
             padding: 0 !important;
             margin: 0 !important;
+            max-width: 100% !important;
         }
+        /* Ensure charts don't get cut off between pages */
         .stPlotlyChart {
             page-break-inside: avoid;
+        }
+        /* Force background colors to show in PDF (important for snapshots) */
+        body {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
     }
     .block-container { padding-top: 2rem; padding-bottom: 2rem; }
@@ -34,17 +43,14 @@ st.markdown("A comprehensive cash flow and net worth analysis.")
 # === SIDEBAR INPUTS ===
 st.sidebar.header("Primary Variables")
 
-# Print/Reset Actions
-col_reset, col_print = st.sidebar.columns(2)
-with col_reset:
-    if st.button("Reset", type="primary", use_container_width=True):
-        if "reset_key" not in st.session_state:
-            st.session_state.reset_key = 0
-        st.session_state.reset_key += 1
-        st.rerun()
+# Reset Action
+if st.sidebar.button("Reset All Variables", type="primary", use_container_width=True):
+    if "reset_key" not in st.session_state:
+        st.session_state.reset_key = 0
+    st.session_state.reset_key += 1
+    st.rerun()
 
-with col_print:
-    st.markdown('<button onclick="window.print()" style="width:100%; height:38px; border-radius:5px; border:1px solid #ccc; background-color:white; cursor:pointer;">Print PDF</button>', unsafe_allow_html=True)
+st.sidebar.info("💡 **To Save as PDF:** Press **Ctrl+P** (Windows) or **Cmd+P** (Mac). The report will automatically reformat for print.")
 
 if "reset_key" not in st.session_state:
     st.session_state.reset_key = 0
@@ -89,12 +95,16 @@ if initial_capital < initial_outlay_buy:
 
 buyer_portfolio = initial_capital - initial_outlay_buy
 renter_portfolio = initial_capital
+
 years_list, buy_net_worth, rent_net_worth = [], [], []
 property_values, mortgage_balances, buyer_portfolios, renter_portfolios = [], [], [], []
 buying_expenses_list, renting_expenses_list, disposition_costs_list = [], [], []
 
 current_property_value, current_mortgage, current_annual_rent = purchase_price, mortgage_balance, monthly_rent * 12
 annual_mortgage_pmt = monthly_mortgage_payment * 12
+year_1_buy_cost = annual_mortgage_pmt + buy_property_taxes + buy_maintenance + buy_utilities + buy_insurance + buy_other_expenses
+year_1_rent_cost = current_annual_rent + rent_utilities + rent_insurance + rent_other_expenses
+
 break_even_year = None
 
 for year in range(1, time_horizon + 1):
@@ -123,7 +133,8 @@ for year in range(1, time_horizon + 1):
     total_buy_nw, total_rent_nw = current_buy_equity + buyer_portfolio, renter_portfolio
     buy_net_worth.append(total_buy_nw)
     rent_net_worth.append(total_rent_nw)
-    if break_even_year is None and total_buy_nw > total_rent_nw: break_even_year = year
+    if break_even_year is None and total_buy_nw > total_rent_nw:
+        break_even_year = year
     property_values.append(current_property_value)
     mortgage_balances.append(current_mortgage)
     buyer_portfolios.append(buyer_portfolio)
@@ -146,8 +157,14 @@ st.plotly_chart(fig, use_container_width=True)
 
 st.markdown("### Year 1 Snapshot")
 c1, c2 = st.columns(2)
-c1.info(f"**BUY OPTION**\n\nTotal Cost: \${annual_mortgage_pmt + buy_property_taxes + buy_maintenance + buy_utilities + buy_insurance + buy_other_expenses:,.0f}")
-c2.warning(f"**RENT OPTION**\n\nTotal Cost: \${(monthly_rent * 12) + rent_utilities + rent_insurance + rent_other_expenses:,.0f}")
+c1.info(f"**BUY OPTION**\n\nTotal Cost: \${year_1_buy_cost:,.0f}")
+c2.warning(f"**RENT OPTION**\n\nTotal Cost: \${year_1_rent_cost:,.0f}")
+
+st.markdown("<br>", unsafe_allow_html=True)
+if year_1_buy_cost > year_1_rent_cost:
+    st.success(f"**Insight:** The Renter has lower monthly costs and invests the cash flow savings of **\${(year_1_buy_cost - year_1_rent_cost):,.2f}** into their portfolio in Year 1.")
+elif year_1_rent_cost > year_1_buy_cost:
+    st.success(f"**Insight:** The Buyer has lower monthly costs and invests the cash flow savings of **\${(year_1_rent_cost - year_1_buy_cost):,.2f}** into their portfolio in Year 1.")
 
 st.markdown("---")
 st.markdown(f"### Final Year Snapshot (Year {time_horizon})")
@@ -155,13 +172,45 @@ c3, c4 = st.columns(2)
 c3.info(f"**BUY NET WORTH**\n\n\${buy_net_worth[-1]:,.0f}")
 c4.warning(f"**RENT NET WORTH**\n\n\${rent_net_worth[-1]:,.0f}")
 
+st.markdown("<br>", unsafe_allow_html=True)
 if buy_net_worth[-1] > rent_net_worth[-1]:
-    st.success(f"**Insight:** Buy leads by \${(buy_net_worth[-1] - rent_net_worth[-1]):,.0f}")
+    st.success(f"**Long-Term Insight:** Over {time_horizon} years, the **Buy** option yields a higher total net worth by **\${(buy_net_worth[-1] - rent_net_worth[-1]):,.0f}**.")
 else:
-    st.success(f"**Insight:** Rent leads by \${(rent_net_worth[-1] - buy_net_worth[-1]):,.0f}")
+    st.success(f"**Long-Term Insight:** Over {time_horizon} years, the **Rent** option yields a higher total net worth by **\${(rent_net_worth[-1] - buy_net_worth[-1]):,.0f}**.")
 
-if break_even_year: st.info(f"**Break-Even:** Year {break_even_year}")
+if break_even_year: 
+    st.info(f"**Break-Even Point:** Buying becomes more advantageous than renting starting in **Year {break_even_year}**.")
+else:
+    st.info(f"**Break-Even Point:** Within this {time_horizon}-year horizon, the Renting scenario remains more advantageous.")
 
-with st.expander("View Year-by-Year Data"):
-    df = pd.DataFrame({"Year": years_list, "Buy NW": buy_net_worth, "Rent NW": rent_net_worth})
-    st.dataframe(df.style.format("{:,.0f}", subset=["Buy NW", "Rent NW"]), use_container_width=True)
+with st.expander("View Year-by-Year Data breakdown"):
+    df = pd.DataFrame({
+        "Year": years_list,
+        "Property Value ($)": property_values,
+        "Mortgage Balance ($)": mortgage_balances,
+        "Buyer Portfolio ($)": buyer_portfolios,
+        "Annual Buying Costs ($)": buying_expenses_list,
+        "Hypothetical Disposition Cost ($)": disposition_costs_list,
+        "Buy Scenario Net Worth ($)": buy_net_worth,
+        "Annual Renting Costs ($)": renting_expenses_list,
+        "Renter Portfolio ($)": renter_portfolios,
+        "Rent Scenario Net Worth ($)": rent_net_worth
+    })
+    styled_df = df.style.format("{:,.0f}", subset=df.columns[1:]) \
+        .set_properties(**{'text-align': 'center'}) \
+        .set_properties(subset=['Buy Scenario Net Worth ($)'], **{'background-color': '#4169E1', 'color': 'white'}) \
+        .set_properties(subset=['Rent Scenario Net Worth ($)'], **{'background-color': '#FFD700', 'color': 'black'})
+    st.dataframe(styled_df, use_container_width=True)
+
+st.markdown("---")
+with st.expander("How this calculator works & Default Assumptions"):
+    st.markdown("""
+    **Methodology: Differential Cash Flow**
+    This calculator provides a true apples-to-apples comparison by assuming both the renter and the buyer commit the exact same amount of cash to their housing each year.
+    * If buying costs more per month, the renter invests the difference into their portfolio.
+    * If renting costs more per month, the buyer invests the difference into their portfolio.
+    
+    **Net Worth Calculation**
+    * **Buy Scenario:** Calculates the liquid walk-away money (Estimated property value - mortgage - selling costs + buyer's investment portfolio).
+    * **Rent Scenario:** Represents the total value of the renter's investment portfolio.
+    """)
