@@ -12,7 +12,12 @@ st.markdown("""
     .block-container { padding-top: 2rem; padding-bottom: 2rem; }
     h1 { font-weight: 300; }
     h2, h3 { font-weight: 400; }
-    footer {visibility: hidden;}
+    
+    /* Aggressive CSS to hide the Streamlit footer */
+    footer {display: none !important;}
+    [data-testid="stStreamlitFooter"] {display: none !important;}
+    [data-testid="stBottom"] {display: none !important;}
+    .stAppBottom {display: none !important;}
     </style>
 """, unsafe_allow_html=True)
 
