@@ -9,15 +9,26 @@ st.set_page_config(page_title="Rent vs Buy Calculator", layout="wide", initial_s
 # Minimal CSS to adjust spacing and font weight, allowing Streamlit to handle the dark mode colors
 st.markdown("""
     <style>
-    .block-container { padding-top: 2rem; padding-bottom: 2rem; }
-    h1 { font-weight: 300; }
-    h2, h3 { font-weight: 400; }
-    
-    /* Aggressive CSS to hide the Streamlit footer */
+    /* Nuke the footer and bottom bars */
     footer {display: none !important;}
     [data-testid="stStreamlitFooter"] {display: none !important;}
     [data-testid="stBottom"] {display: none !important;}
     .stAppBottom {display: none !important;}
+    
+    /* Remove all padding and borders from the main containers */
+    [data-testid="stAppViewContainer"] {
+        padding: 0 !important;
+        border: none !important;
+    }
+    .main .block-container {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+        border: none !important;
+    }
+    
+    /* Target potential border wrappers */
+    [data-testid="stHeader"] {display: none !important;}
+    div.stActionButton {display: none !important;}
     </style>
 """, unsafe_allow_html=True)
 
