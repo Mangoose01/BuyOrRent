@@ -67,17 +67,21 @@ if initial_capital < initial_outlay_buy:
 buyer_portfolio = initial_capital - initial_outlay_buy
 renter_portfolio = initial_capital
 
-# Tracking lists
-years_list = []
-buy_net_worth = []
-rent_net_worth = []
-property_values = []
-mortgage_balances = []
-buyer_portfolios = []
-renter_portfolios = []
-buying_expenses_list = []
-renting_expenses_list = []
-disposition_costs_list = []
+# Calculate Year 0 Base Equities
+disposition_fee_0 = purchase_price * disposition_cost_pct
+buy_equity_0 = purchase_price - mortgage_balance - disposition_fee_0
+
+# Tracking lists initialized with Year 0 data
+years_list = [0]
+buy_net_worth = [buy_equity_0 + buyer_portfolio]
+rent_net_worth = [renter_portfolio]
+property_values = [purchase_price]
+mortgage_balances = [mortgage_balance]
+buyer_portfolios = [buyer_portfolio]
+renter_portfolios = [renter_portfolio]
+buying_expenses_list = [0]
+renting_expenses_list = [0]
+disposition_costs_list = [disposition_fee_0]
 
 current_property_value = purchase_price
 current_mortgage = mortgage_balance
@@ -228,7 +232,7 @@ st.markdown("### Break-Even Analysis")
 if break_even_year:
     st.info(f"**Crossover Point:** The Buying scenario becomes more advantageous than Renting starting in **Year {break_even_year}**.")
 else:
-    st.info("**Crossover Point:** Within this {time_horizon}-year horizon, the Renting scenario remains more advantageous than Buying.")
+    st.info(f"**Crossover Point:** Within this {time_horizon}-year horizon, the Renting scenario remains more advantageous than Buying.")
 
 st.markdown("---")
 
