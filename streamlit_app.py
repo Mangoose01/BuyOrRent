@@ -6,27 +6,14 @@ import numpy as np
 # Page Configuration for a wide, clean layout
 st.set_page_config(page_title="Rent vs Buy Calculator", layout="wide", initial_sidebar_state="expanded")
 
-# === THEME TOGGLE LOGIC ===
-st.sidebar.header("Display Settings")
-theme_toggle = st.sidebar.radio("App Theme", ["Light Mode", "Dark Mode"], horizontal=True)
-
-if theme_toggle == "Dark Mode":
-    st.markdown("""
-        <style>
-        [data-testid="stAppViewContainer"] { background-color: #0E1117; color: #FAFAFA; }
-        [data-testid="stSidebar"] { background-color: #262730; }
-        h1, h2, h3, p, label, .stMarkdown { color: #FAFAFA !important; }
-        </style>
-    """, unsafe_allow_html=True)
-    chart_template = "plotly_dark"
-else:
-    st.markdown("""
-        <style>
-        h1 { font-weight: 300; color: #1f1f1f; }
-        h2, h3 { font-weight: 400; color: #333333; }
-        </style>
-    """, unsafe_allow_html=True)
-    chart_template = "plotly_white"
+# Minimal CSS to adjust spacing and font weight, allowing Streamlit to handle the dark mode colors
+st.markdown("""
+    <style>
+    .block-container { padding-top: 2rem; padding-bottom: 2rem; }
+    h1 { font-weight: 300; }
+    h2, h3 { font-weight: 400; }
+    </style>
+""", unsafe_allow_html=True)
 
 st.title("Rent vs. Buy Financial Comparison")
 st.markdown("A comprehensive cash flow and net worth analysis.")
@@ -200,7 +187,7 @@ fig.add_trace(go.Scatter(
 fig.update_layout(
     title=dict(text=f"Total Net Worth Projection Over {time_horizon} Years", font=dict(size=20)),
     xaxis_title="Years", yaxis_title="Net Liquid Value ($)",
-    hovermode="x unified", template=chart_template,
+    hovermode="x unified", 
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     margin=dict(l=0, r=0, t=60, b=0)
 )
