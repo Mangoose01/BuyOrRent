@@ -12,6 +12,7 @@ st.markdown("""
     .block-container { padding-top: 2rem; padding-bottom: 2rem; }
     h1 { font-weight: 300; }
     h2, h3 { font-weight: 400; }
+    footer {visibility: hidden;}
     </style>
 """, unsafe_allow_html=True)
 
