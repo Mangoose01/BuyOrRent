@@ -161,15 +161,17 @@ for year in range(1, time_horizon + 1):
 # === INTERACTIVE VISUALIZATION ===
 fig = go.Figure()
 
-fig.add_trace(go.Scatter(
-    x=years_list, y=buy_net_worth, mode='lines+markers', name='Buy (Equity + Portfolio)',
-    line=dict(color='#4169E1', width=3), marker=dict(size=6),
-    hovertemplate="Year %{x}<br>Total Net Worth: $%{y:,.0f}<extra></extra>"
-))
-
+# Add Rent Scenario Line FIRST to put it on top in the legend and hover tooltip
 fig.add_trace(go.Scatter(
     x=years_list, y=rent_net_worth, mode='lines+markers', name='Rent (Portfolio Value)',
     line=dict(color='#FFD700', width=3), marker=dict(size=6),
+    hovertemplate="Year %{x}<br>Total Net Worth: $%{y:,.0f}<extra></extra>"
+))
+
+# Add Buy Scenario Line SECOND
+fig.add_trace(go.Scatter(
+    x=years_list, y=buy_net_worth, mode='lines+markers', name='Buy (Equity + Portfolio)',
+    line=dict(color='#4169E1', width=3), marker=dict(size=6),
     hovertemplate="Year %{x}<br>Total Net Worth: $%{y:,.0f}<extra></extra>"
 ))
 
