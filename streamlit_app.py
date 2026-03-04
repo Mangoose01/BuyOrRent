@@ -6,7 +6,7 @@ import numpy as np
 # Page Configuration for a wide, clean layout
 st.set_page_config(page_title="Rent vs Buy Calculator", layout="wide", initial_sidebar_state="expanded")
 
-# Minimal CSS to adjust spacing and font weight, allowing Streamlit to handle the dark mode colors
+# Minimal CSS to adjust spacing and font weight, allowing Streamlit to handle the colors
 st.markdown("""
     <style>
     /* Nuke the footer and bottom bars */
@@ -20,7 +20,7 @@ st.markdown("""
         border-radius: 0 !important;
         box-shadow: none !important;
         padding: 0 !important;
-        background-color: #0E1117 !important;
+        background-color: #FFFFFF !important;
     }
     
     [data-testid="stAppViewBlockContainer"] {
