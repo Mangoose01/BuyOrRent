@@ -13,22 +13,28 @@ st.markdown("""
     footer {display: none !important;}
     [data-testid="stStreamlitFooter"] {display: none !important;}
     [data-testid="stBottom"] {display: none !important;}
-    .stAppBottom {display: none !important;}
     
-    /* Remove all padding and borders from the main containers */
+    /* Target the exact app containers to remove borders, shadows, and rounded corners */
     [data-testid="stAppViewContainer"] {
-        padding: 0 !important;
         border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        background-color: #0E1117 !important;
     }
-    .main .block-container {
+    
+    [data-testid="stAppViewBlockContainer"] {
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
         padding-top: 2rem !important;
         padding-bottom: 2rem !important;
-        border: none !important;
     }
     
-    /* Target potential border wrappers */
-    [data-testid="stHeader"] {display: none !important;}
-    div.stActionButton {display: none !important;}
+    .main .block-container {
+        border: none !important;
+        max-width: 100% !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
